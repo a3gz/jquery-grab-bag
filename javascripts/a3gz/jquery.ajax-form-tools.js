@@ -24,12 +24,14 @@
 	// Create the defaults once
 	var pluginName = "ajaxForm";
 	var defaults = {
+        resetInputs: true,
         beforeSubmit: null,
         done: null,
         fail: null,
         always: null,
         validate: function() { return true; },
-        outputContainer: false
+        outputContainer: false,
+        minWidth: 100,
     };
     
 	// The actual plugin constructor
@@ -207,7 +209,7 @@
             var msg;
             if ( jqXHR.responseJSON ) {
                 var error = jqXHR.responseJSON;
-                msg = error.reason;
+                msg = error.error + ': ' + error.error_description;
                 
                 if ( error.targetInputs ) {
                     jQuery.each( error.targetInputs, function( i, field ) {
@@ -247,6 +249,10 @@
          */
         resetInputs: function()
         {
+            if ( !this.settings.resetInputs ) {
+                return;
+            }
+            
             this.form.find(':input').each(function() {
                 var input = jQuery(this);
                 var value = '';
@@ -267,7 +273,12 @@
             var self = this;
             
             if ( !self.settings.spinnerButton ) {
-                self.settings.spinnerButton = self.form.find('button[type=submit]').buttonSpinner();
+                var btn = self.form.find('button[type=submit]');
+                // Hack to fix a bizarre problem with there are more than one buttons on a page.
+                if ( btn.width() < 0 ) {
+                    btn.addClass('btn-block');
+                }
+                self.settings.spinnerButton = btn.buttonSpinner();
             }
             
             // When an input is focused, all errors associated to it are cleared
