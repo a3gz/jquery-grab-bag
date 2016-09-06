@@ -11,25 +11,37 @@
  
 ;(function() {
 	jQuery.flashMessages = {
-		container: '#flashMessages',
+		container: null,
+        wordUpTime: 100, // in milliseconds
 		
 		/**
-		 *
+		 * Establishes a fallback messages container. 
+         * 
+         * @param container A jQuery object or a selector name.
+         * 
+         * @return this
 		 */
-		setContainer: function( name )
+		setContainer: function( container )
 		{
-			container = name;
+            if ( typeof container == 'string' ) {
+                container = jQuery(container);
+            }
+			this.container = container;
 			return this;
 		},
 		// setContainer()
+        
 		
 		/**
-		 *
+		 * General purpose message box generator. 
+         *
+         * @param boxParams An object having the box class (info, primary, success, warning or danger) and the message.
+         * @param container A container to be used for this message alone. If not given, the fallback container is used.
 		 */
-		box: function(boxParams)
+		box: function(boxParams, container)
 		{
 			var theId = boxParams.className + String(new Date().getTime() / 1000);
-			var $msgBox = jQuery('<div>', {id: theId, class: 'alert alert-' + boxParams.className})
+			var msgBox = jQuery('<div>', {id: theId, class: 'alert alert-' + boxParams.className})
 					.html(
 						'<button type="button" class="close" data-dismiss="alert">&times;</button>'
 						+ '<span class="message">' + boxParams.message + '</span>' 
@@ -39,17 +51,38 @@
 						evt.stopPropagation();
 					});
 
-			jQuery(jQuery.flashMessages.container).prepend($msgBox).show();
-			
+            var destroyContainer = true;
+            
+            if ( (typeof container == 'undefined') || (container == null) ) {
+                container = this.getFallbackContainer();
+                destroyContainer = false;
+            } else {
+                
+                if ( typeof container == 'string' ) {
+                    container = jQuery(container);
+                }
+            }
+            container.prepend(msgBox).show();
+
 			// Messages other than danger will close automatically. 
 			// The time the box will be visible is calculated from the number of letters in the message.
-			if (boxParams.className != 'danger')
-			{
-				var ms = 100; // milliseconds per word to wait before closing 
-				var msgLen = parseInt(boxParams.message.length);
-				var timeout = (ms * msgLen);
-				setTimeout(function() { $msgBox.slideUp(function() { $msgBox.remove(); }) }, timeout);
+            var ms = this.wordUpTime; // milliseconds per word to wait before closing 
+            var msgLen = parseInt(boxParams.message.length);
+            var timeout = (ms * msgLen);
+            
+            // Danger boxes remain double the time
+			if (boxParams.className == 'danger') {
+                timeout *= 2;
 			}
+            
+            setTimeout(function() { msgBox.slideUp(function() { 
+                msgBox.remove(); 
+                if ( destroyContainer ) {
+                    container.remove();
+                } else {
+                    container.hide();
+                }
+            }) }, timeout);
 			
 		},
 		// box()
@@ -58,13 +91,13 @@
 		/**
 		 * 
 		 */
-		danger: function(msg)
+		danger: function(msg, container)
 		{
 			var boxParams = {
 				className: 'danger',
 				message: msg
 			};
-			jQuery.flashMessages.box(boxParams);
+			this.box(boxParams, container);
 		},
 		// error()
 		
@@ -72,13 +105,13 @@
 		/**
 		 * 
 		 */
-		info: function(msg)
+		info: function(msg, container)
 		{
 			var boxParams = {
 				className: 'info',
 				message: msg
 			};
-			jQuery.flashMessages.box(boxParams);
+			this.box(boxParams, container);
 		},
 		// notice()
 
@@ -86,13 +119,13 @@
 		/**
 		 * 
 		 */
-		success: function(msg)
+		success: function(msg, container)
 		{
 			var boxParams = {
 				className: 'success',
 				message: msg
 			};
-			jQuery.flashMessages.box(boxParams);
+			this.box(boxParams, container);
 		},
 		// notice()
 	
@@ -100,31 +133,33 @@
 		/**
 		 * 
 		 */
-		warning: function(msg)
+		warning: function(msg, container)
 		{
 			var boxParams = {
 				className: 'warning',
 				message: msg
 			};
-			jQuery.flashMessages.box(boxParams);
+            
+			this.box(boxParams, container);
 		},
 		// warning()
+        
+        
+        /**
+         * Create a general purpose container and inserts it in the <body>.
+         *
+         * @return jQuery object
+         */
+        getFallbackContainer: function()
+        {
+            if ( !this.container ) {
+                var c = jQuery('<div/>', {id:'flashMessagesContainer'});
+                jQuery('body').append(c);
+                this.container = c; 
+            }
+            
+            return this.container;
+        },
+        // makeGeneralPurposeContainer()
 	};
 })();
-
-
-/***
- * Setup a timeout on any messages existing inside the container 
- */
-jQuery(document).ready(function() {
-	jQuery(jQuery.flashMessages.container).find('.alert').each( function( i, box ) {
-		var $msgBox = jQuery(box);
-		if ( !$msgBox.hasClass('danger') )
-		{
-			var ms = 100; // milliseconds per word to wait before closing 
-			var msgLen = parseInt(($msgBox.find('.message').html()).length);
-			var timeout = (ms * msgLen);
-			setTimeout(function() { $msgBox.slideUp(function() { $msgBox.remove(); }) }, timeout);
-		}
-	});
-});
