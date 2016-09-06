@@ -30,8 +30,7 @@
         fail: null,
         always: null,
         validate: function() { return true; },
-        outputContainer: false,
-        minWidth: 100,
+        outputContainer: false
     };
     
 	// The actual plugin constructor
@@ -274,10 +273,6 @@
             
             if ( !self.settings.spinnerButton ) {
                 var btn = self.form.find('button[type=submit]');
-                // Hack to fix a bizarre problem with there are more than one buttons on a page.
-                if ( btn.width() < 0 ) {
-                    btn.addClass('btn-block');
-                }
                 self.settings.spinnerButton = btn.buttonSpinner();
             }
             
@@ -484,14 +479,22 @@
             
             // Establish the button width to its current value so it doesn't 
             // change when the label is replaced by the icon. 
-            this.button.width( this.button.width() );
+            this.button.width( this.getBestButtonWidth( this.button ) );
             
             // Store styles to use them when the button ins disabled
             this.button.data('backgroundColor', this.button.css('backgroundColor'));
             this.button.data('color', this.button.css('color'));
 
             // Store the current lable to restore it after when processing is done.
-            this.button.data('label', this.button.html());
+            var label = this.button.html();
+            var fa = this.button.data('fa');
+            if ( fa != null ) {
+                this.button.width( this.button.width() + 60 );
+                label = '<i class="' + fa + '"></i> ' + label;
+                this.button.html( label );
+            }
+            
+            this.button.data('label', label);
             
             // This plugin accepts only FontAwesome icons.
             this.settings.spinner = jQuery('<i class="fa fa-spin fa-' + this.settings.activityIcon + ' fa-' + this.settings.size + '"></i>')            
@@ -528,6 +531,17 @@
         },
         // enableButton()
         
+        
+        /**
+         *
+         */
+        getBestButtonWidth: function( button )
+        {
+            return button.width();
+        },
+        // getBestButtonWidth()
+        
+        
         /**
          *
          */
@@ -546,7 +560,8 @@
          */
         restoreButtonLabel: function() 
         {
-            this.button.html( this.button.data('label') );
+            var html = this.button.data('label');
+            this.button.html( html );
         },
         // restoreButtonLabel()
         
