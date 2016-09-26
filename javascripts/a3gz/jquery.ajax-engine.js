@@ -115,7 +115,10 @@
                     
                     self.startTimer();
                     
-                });              
+                });           
+
+            // Star the engine 
+            self.loop();
         },
         // init()
         
