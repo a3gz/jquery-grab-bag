@@ -152,6 +152,10 @@
         {
             var self = this;
             
+            if ( self.settings.engineOff ) {
+                return;
+            }
+            
             self.setSilentMode();
             
             jQuery.ajax({
