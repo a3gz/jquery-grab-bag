@@ -273,8 +273,9 @@
             
             if ( !self.settings.spinnerButton ) {
                 var btn = self.form.find('button[type=submit]');
-                self.settings.spinnerButton = btn.buttonSpinner();
+                self.settings.spinnerButton = btn;
             }
+            self.settings.spinnerButton.buttonSpinner();
             
             // When an input is focused, all errors associated to it are cleared
             self.form.find(':input').on('focus', function() {
