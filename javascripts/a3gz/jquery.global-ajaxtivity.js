@@ -13,6 +13,8 @@
         screenId: 'ajax-screen-lock',
         
         spinnerId: 'global-ajaxtivity',
+        spinnerRight: '',
+        spinnerBottom: '',
         spinnerLeft: '50%',
         spinnerTop: '40%',
         spinnerImageUrl: false,
@@ -50,7 +52,7 @@
             // Ajax activity indicator 
             var container = jQuery('<div/>', {
                 id: self.settings.spinnerId, 
-                style: 'position:fixed; left:'+self.settings.spinnerLeft+'; top:'+self.settings.spinnerTop+'; display:none; z-index:'+self.settings.screenZindex+1 + ';'
+                style: 'position:fixed; left:'+self.settings.spinnerLeft+'; top:'+self.settings.spinnerTop+'; bottom:'+self.settings.spinnerBottom+'; right:'+self.settings.spinnerRight+'; display:none; z-index:'+self.settings.screenZindex+1 + ';'
             } );
             var icon = jQuery('<img/>', {
                 src: self.settings.spinnerImageUrl
